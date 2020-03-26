@@ -1,15 +1,14 @@
 use crate::utils::{PathUtils};
-use crate::AppState;
 use actix_multipart::Multipart;
 use actix_web::web::Data;
 use actix_web::{Error, HttpResponse, Result};
 
 use futures::{StreamExt, TryStreamExt};
 use std::io::Write;
-use crate::file::FileMetadata;
+use crate::models::{ApplicationState, FileMetadata};
 
 pub async fn upload_action(
-    state: Data<AppState<'_>>,
+    state: Data<ApplicationState<'_>>,
     mut payload: Multipart,
 ) -> Result<HttpResponse, Error> {
     let mut payload_data = payload.try_next().await.unwrap().unwrap();
@@ -26,7 +25,7 @@ pub async fn upload_action(
         result_file_content.len()
     );
     
-    let client = state.storage_client.pull();
+    let client = state.storage_client_pool.pull();
 
     client.upload(
         &file_metadata.path,

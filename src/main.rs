@@ -4,36 +4,36 @@ use actix_web::{web, App, HttpServer};
 use object_pool::Pool;
 
 use std::env;
-use crate::state::ApplicationState;
 use std::str::FromStr;
+use crate::models::{ApplicationState, FileMetadata};
 
-mod state;
+mod models;
 mod actions;
-mod file;
 mod storage;
 mod utils;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
-        let opts = RunOptions::from_env();
-
-        let app_state = ApplicationState {
-            storage_client: Pool::new(opts.pool_size, || {
-                S3Client::new(&opts.endpoint, 
-                              &opts.bucket_name, 
-                              &opts.access_key,
-                              &opts.secret_key)
-            }),
-        };
-
-        App::new().data(app_state)
-            .service(web::resource("/{file_id}").route(web::get().to(download_action))
+        let application_state = create_app_state(RunOptions::from_env());
+        App::new().data(application_state)
+            .service(web::resource("/{file_hash}").route(web::get().to(download_action))
             ).service(web::resource("/").route(web::post().to(upload_action))
         )
     }).bind("0.0.0.0:17200")?
         .run()
         .await
+}
+
+fn create_app_state<'s>(options: RunOptions) -> ApplicationState<'s> {
+    ApplicationState {
+        storage_client_pool: Pool::new(options.pool_size, || {
+            S3Client::new(&options.endpoint,
+                          &options.bucket_name,
+                          &options.access_key,
+                          &options.secret_key)
+        }),
+    }
 }
 
 struct RunOptions {

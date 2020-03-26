@@ -15,7 +15,7 @@ impl S3Client {
 
         let region = Region::Custom {
             region: "Custom".to_string(),
-            endpoint.to_string()
+            endpoint: endpoint.to_string()
         };
 
         S3Client {

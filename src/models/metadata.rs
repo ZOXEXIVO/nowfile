@@ -1,12 +1,10 @@
 use serde::{Deserialize, Serialize};
+use std::error::Error;
 
 #[derive(Serialize, Deserialize)]
 pub struct FileMetadata {
-    #[serde(rename = "c")]
     pub content_type: String,
-    #[serde(rename = "p")]
     pub path: String,
-    #[serde(rename = "s")]
     pub size: usize
 }
 
@@ -19,10 +17,18 @@ impl FileMetadata {
         }
     }
     
-    pub fn from_hash(hash: &str) -> Self {
-        let base64_decoded = base64::decode(hash).unwrap();
-        
-        serde_json::from_slice(&base64_decoded).unwrap()
+    pub fn from_hash(hash: &str) -> Result<FileMetadata, String> {
+        match base64::decode(hash) {
+            Ok(decoded_data) => {
+                match serde_json::from_slice::<FileMetadata>(&decoded_data){
+                    Ok(file_metadata) => Ok(file_metadata),
+                    Err(err) => Err(format!("Deserialization error: {}", err.to_string()))
+                }
+            },
+            Err(_) => {
+                Err(String::from("Base64 decoding error"))
+            }
+        }
     }
     
     pub fn into_hash(self) -> String {
@@ -43,7 +49,7 @@ mod tests {
             "/path".to_string(), 
             123);
         
-        let decoded_metadata= FileMetadata::from_hash(&metadata.into_hash());
+        let decoded_metadata= FileMetadata::from_hash(&metadata.into_hash()).unwrap();
         
         assert_eq!(decoded_metadata.content_type, "image/jpg".to_string());
         assert_eq!(decoded_metadata.path, "/path".to_string());
