@@ -6,18 +6,24 @@ use object_pool::Pool;
 use std::env;
 use std::str::FromStr;
 use crate::models::{ApplicationState, FileMetadata};
+use crate::logging::Logger;
+
+use slog::*;
 
 mod models;
 mod actions;
 mod storage;
 mod utils;
-
+mod logging;
+ 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(move || {
-        let application_state = create_app_state(RunOptions::from_env());
+    HttpServer::new(move || {  
+        let logger = Logger::init("nowfile");
+        let application_state = create_app_state(RunOptions::from_env(), logger);
+        
         App::new().data(application_state)
-            .service(web::resource("/{file_hash}").route(web::get().to(download_action))
+            .service(web::resource("/{file_id}").route(web::get().to(download_action))
             ).service(web::resource("/").route(web::post().to(upload_action))
         )
     }).bind("0.0.0.0:17200")?
@@ -25,14 +31,17 @@ async fn main() -> std::io::Result<()> {
         .await
 }
 
-fn create_app_state<'s>(options: RunOptions) -> ApplicationState<'s> {
+fn create_app_state<'s>(options: RunOptions, logger: slog::Logger) -> ApplicationState<'s> {
+    info!(logger, "nowfile started {0}, {1}", &options.endpoint, &options.bucket_name);
+    
     ApplicationState {
         storage_client_pool: Pool::new(options.pool_size, || {
             S3Client::new(&options.endpoint,
                           &options.bucket_name,
                           &options.access_key,
-                          &options.secret_key)
+                          &options.secret_key)            
         }),
+        logger
     }
 }
 
@@ -54,7 +63,7 @@ impl RunOptions {
             access_key: env::var("ACCESS_KEY").unwrap_or("123".to_string()),
             secret_key: env::var("SECRET_KEY").unwrap_or("321".to_string()),
 
-            pool_size:  usize::from_str(&env::var("POOL_SIZE").unwrap_or("100".to_string())).unwrap()
+            pool_size:  usize::from_str(&env::var("POOL_SIZE").unwrap_or("2".to_string())).unwrap()
         }
     }
 }

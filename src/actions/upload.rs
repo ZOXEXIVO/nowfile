@@ -33,5 +33,5 @@ pub async fn upload_action(
         result_file_content,
     ).await;
 
-    Ok(HttpResponse::Ok().body(file_metadata.into_hash()).into())
+    Ok(HttpResponse::Ok().body(file_metadata.into_id()).into())
 }

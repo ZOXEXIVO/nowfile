@@ -17,8 +17,8 @@ impl FileMetadata {
         }
     }
     
-    pub fn from_hash(hash: &str) -> Result<FileMetadata, String> {
-        match base64::decode(hash) {
+    pub fn from_id(file_id: &str) -> Result<FileMetadata, String> {
+        match base64::decode(file_id) {
             Ok(decoded_data) => {
                 match serde_json::from_slice::<FileMetadata>(&decoded_data){
                     Ok(file_metadata) => Ok(file_metadata),
@@ -31,7 +31,7 @@ impl FileMetadata {
         }
     }
     
-    pub fn into_hash(self) -> String {
+    pub fn into_id(self) -> String {
         let json_data = serde_json::to_string(&self).unwrap();
  
         base64::encode(json_data)

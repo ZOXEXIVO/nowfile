@@ -23,8 +23,8 @@ impl S3Client {
         }
     }
     
-    pub async fn download(&self, path: String) -> Vec<u8> {
-        let result = self.bucket.get_object(&path).await.unwrap();  
+    pub async fn download(&self, path: &str) -> Vec<u8> {
+        let result = self.bucket.get_object(path).await.unwrap();  
         
         result.0
     }
