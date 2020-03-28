@@ -6,6 +6,7 @@ use actix_web::{Error, HttpResponse, Result};
 use futures::{StreamExt, TryStreamExt};
 use std::io::Write;
 use crate::models::{ApplicationState, FileMetadata};
+use mime_guess::MimeGuess;
 
 pub async fn upload_action(
     state: Data<ApplicationState<'_>>,
@@ -20,9 +21,8 @@ pub async fn upload_action(
     }
 
     let file_metadata = FileMetadata::new(
-        payload_data.content_disposition().unwrap().to_string(),
-        PathUtils::get_unique_file_path(),
-        result_file_content.len()
+        String::from(""),
+        PathUtils::get_unique_file_path()
     );
     
     let client = state.storage_client_pool.pull();

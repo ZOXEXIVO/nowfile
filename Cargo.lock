@@ -1345,6 +1345,7 @@ dependencies = [
  "base64 0.12.0",
  "chrono",
  "futures",
+ "mime_guess",
  "object-pool",
  "rand",
  "rust-s3",

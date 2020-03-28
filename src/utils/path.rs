@@ -4,9 +4,9 @@ use crate::utils::Random;
 pub struct PathUtils;
 
 impl PathUtils{
-    pub fn get_unique_file_path() -> String{
+    pub fn get_unique_file_path() -> String {
         let folder = Self::get_current_date_folder();
-        let filename = Random::generate_random(30);
+        let filename = Random::generate_random(20);
         
         format!("{0}/{1}", folder, filename)
     } 
@@ -14,7 +14,7 @@ impl PathUtils{
     fn get_current_date_folder() -> String {
         let utc: DateTime<Utc> = Utc::now();
 
-        format!("{0:02}_{1:02}_{2}", utc.day(), utc.month(), utc.year())
+        format!("{0:02}{1:02}{2}", utc.day(), utc.month(), utc.year())
     }
 }
 
