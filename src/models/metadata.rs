@@ -1,5 +1,8 @@
 use serde::{Deserialize, Serialize};
 use std::error::Error;
+use crate::RunOptions;
+use crate::digest::HmacUtils;
+use std::fmt::Write;
 
 #[derive(Serialize, Deserialize)]
 pub struct FileMetadata {
@@ -17,24 +20,45 @@ impl FileMetadata {
         }
     }
     
-    pub fn from_id(file_id: &str) -> Result<FileMetadata, String> {
-        match base64::decode(file_id) {
-            Ok(decoded_data) => {
-                match serde_json::from_slice::<FileMetadata>(&decoded_data){
-                    Ok(file_metadata) => Ok(file_metadata),
-                    Err(err) => Err(format!("Deserialization error: {}", err.to_string()))
-                }
-            },
-            Err(_) => {
-                Err(String::from("Base64 decoding error"))
-            }
+    // {data}.{signature}
+    pub fn from_id(file_id: &str, token_secret: &str) -> Result<FileMetadata, String> {
+        let splitted: Vec<&str> = file_id.split('.').collect();
+        
+        if splitted.len() != 2 {
+            return Err(String::from("format error"))
+        }
+        
+        let data = splitted[0];
+        let signature = splitted[1];
+
+        let computed_signature = HmacUtils::compute(&data, token_secret);
+        
+        if signature != computed_signature {
+            return Err(String::from("invalid signature"))
+        }
+        
+        let decoded_data = base64::decode(data).expect("cannot decode base64 data");
+
+        match serde_json::from_slice::<FileMetadata>(&decoded_data){
+            Ok(file_metadata) => Ok(file_metadata),
+            Err(err) => Err(format!("Deserialization error: {}", err.to_string()))
         }
     }
     
-    pub fn into_id(self) -> String {
-        let json_data = serde_json::to_string(&self).unwrap();
+    pub fn into_id(self, token_secret: &str) -> String {
+        let json_data = serde_json::to_string(&self).expect("cannot serialize metadata");
  
-        base64::encode(json_data)
+        let base64_json_data = base64::encode(json_data);
+
+        let signature = HmacUtils::compute(&base64_json_data, token_secret);
+
+        let mut result_string = String::with_capacity(base64_json_data.len() + 1 + signature.len());
+
+        result_string.write_str(&base64_json_data);
+        result_string.write_char('.');
+        result_string.write_str(&signature);
+
+        result_string
     }
 }
 
@@ -44,11 +68,13 @@ mod tests {
 
     #[test]
     fn into_hash_from_hash_is_correct() {
+        let token_key = "some_key";
+        
         let metadata = FileMetadata::new(
             "image/jpg".to_string(), 
             "/path".to_string());
         
-        let decoded_metadata= FileMetadata::from_id(&metadata.into_id()).unwrap();
+        let decoded_metadata= FileMetadata::from_id(&metadata.into_id(&token_key), &token_key).unwrap();
         
         assert_eq!(decoded_metadata.content_type, "image/jpg".to_string());
         assert_eq!(decoded_metadata.path, "/path".to_string());

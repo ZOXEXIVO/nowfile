@@ -33,5 +33,7 @@ pub async fn upload_action(
         result_file_content,
     ).await;
 
-    Ok(HttpResponse::Ok().body(file_metadata.into_id()).into())
+    let file_id = file_metadata.into_id(&state.options.token_key);
+
+    Ok(HttpResponse::Ok().body(file_id).into())
 }

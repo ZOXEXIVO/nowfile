@@ -16,7 +16,7 @@ pub async fn download_action(request: HttpRequest, route_params: web::Path<Downl
         return Ok(HttpResponse::NotFound().finish())
     }
 
-    match FileMetadata::from_id(&route_params.file_id) {
+    match FileMetadata::from_id(&route_params.file_id, &state.options.token_key) {
         Ok(metadata) => {
             let client = state.storage_client_pool.pull();
 
@@ -29,10 +29,10 @@ pub async fn download_action(request: HttpRequest, route_params: web::Path<Downl
             
             Ok(HttpResponse::Ok().content_type(&metadata.content_type).body(file_content))
         }, 
-        Err(e) => {
-            warn!(state.logger, "download failed, {0}", &route_params.file_id);
+        Err(err) => {
+            warn!(state.logger, "download failed, {0}, {1}", &route_params.file_id, err);
             
-            Ok(HttpResponse::BadRequest().body(e))
+            Ok(HttpResponse::BadRequest().body(err))
         }
     }
 }
