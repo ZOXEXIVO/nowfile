@@ -6,7 +6,6 @@ use actix_web::{Error, HttpResponse, Result};
 use futures::{StreamExt, TryStreamExt};
 use std::io::Write;
 use crate::models::{ApplicationState, FileMetadata};
-use mime_guess::MimeGuess;
 
 pub async fn upload_action(
     state: Data<ApplicationState<'_>>,

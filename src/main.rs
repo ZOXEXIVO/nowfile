@@ -5,7 +5,7 @@ use object_pool::Pool;
 
 use std::env;
 use std::str::FromStr;
-use crate::models::{ApplicationState, FileMetadata};
+use crate::models::{ApplicationState};
 use crate::logging::Logger;
 
 use slog::*;

@@ -1,4 +1,4 @@
-use actix_web::web::{Data, Path};
+use actix_web::web::{Data};
 use actix_web::{HttpResponse, web, Result, HttpRequest};
 use serde::Deserialize;
 
