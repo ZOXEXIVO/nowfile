@@ -23,13 +23,27 @@ impl S3Client {
         }
     }
     
-    pub async fn download(&self, path: &str) -> Vec<u8> {
-        let result = self.bucket.get_object(path).await.unwrap();  
-        
-        result.0
+    pub async fn download(&self, path: &str) -> Result<Vec<u8>, String> {
+        match self.bucket.get_object(path).await {
+            Ok(data) => {
+                match data.1 {
+                    200 => Ok(data.0),
+                    _ => Err(format!("StatusCode: {0}", data.1))
+                }
+            },
+            Err(err) => Err(err.description.unwrap())
+        }
     }
 
-    pub async fn upload(&self, path: &str, content_type: &str, file_content: Vec<u8>) {
-        self.bucket.put_object(&path, &file_content, &content_type).await.unwrap();
+    pub async fn upload(&self, path: &str, content_type: &str, file_content: Vec<u8>) -> Result<(), String>  {        
+        match self.bucket.put_object(&path, &file_content, &content_type).await {
+            Ok(data) => {
+                match data.1 {
+                    200 => Ok(()),
+                    _ => Err(format!("StatusCode: {0}", data.1))
+                }
+            },
+            Err(err) => Err(String::from(err.description.unwrap()))
+        }
     }
 }
