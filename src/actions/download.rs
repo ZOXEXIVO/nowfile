@@ -32,7 +32,7 @@ pub async fn download_action(request: HttpRequest, route_params: web::Path<Downl
         Err(err) => {
             warn!(state.logger, "download failed, {0}, {1}", &route_params.file_id, err);
             
-            Ok(HttpResponse::BadRequest().body(err))
+            Ok(HttpResponse::NotFound().body(err))
         }
     }
 }

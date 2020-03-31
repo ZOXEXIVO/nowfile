@@ -8,18 +8,24 @@ pub struct HmacUtils;
 
 impl HmacUtils {
     pub fn compute(data: &str, key: &str) -> String {
+        let digest = Self::create_digest(data, key);
+
+        Self::encode_for_web(base64::encode(digest))
+    }
+
+    fn create_digest(data: &str, key: &str) -> Vec<u8> {
         let mut mac = HmacSha256::new_varkey(key.as_bytes()).unwrap();
 
         mac.input(data.as_bytes());
 
-        let hash_vec = mac.result().code().to_vec();
-
-        hash_vec.iter()
-            .fold(String::with_capacity(2 * hash_vec.len()),
-                  |mut res, b| {
-                      res.push_str(&format!("{:02x}", b));
-                      res
-                  })
+        mac.result().code().to_vec()
+    }
+    
+    fn encode_for_web(base64_hash: String) -> String {
+        base64_hash
+            .trim_end_matches("=")
+            .replace("+", "-")
+            .replace("/", "_")
     }
 }
 
@@ -40,8 +46,8 @@ mod tests {
 
         let data2_signature = HmacUtils::compute(&data2, key);
 
-        assert_eq!(data1_signature, String::from("fa9d06b0c8df42ec23c799f332a3badc101f1fc0e097c900d0fcc9e681f33b8d"));
-        assert_eq!(data2_signature, String::from("bbc886c421598421a24c035af2b8784c93a66519e5633b0423d90b598adeb523"));
+        assert_eq!(data1_signature, String::from("+p0GsMjfQuwjx5nzMqO63BAfH8Dgl8kA0PzJ5oHzO40="));
+        assert_eq!(data2_signature, String::from("u8iGxCFZhCGiTANa8rh4TJOmZRnlYzsEI9kLWYretSM="));
         
         assert_eq!(data1_signature, data1_again_signature);
         assert_ne!(data1_signature, data2_signature);
