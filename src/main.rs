@@ -59,16 +59,16 @@ pub struct RunOptions {
 impl RunOptions {
     pub fn from_env() -> Self{
         RunOptions {
-            endpoint: env::var("ENDPOINT").unwrap_or("http://localhost:4572".to_string()),
+            endpoint: env::var("ENDPOINT").unwrap_or_else(|_| "http://localhost:4572".to_string()),
 
-            bucket_name: env::var("BUCKET_NAME").unwrap_or("test-bucket".to_string()),
+            bucket_name: env::var("BUCKET_NAME").unwrap_or_else(|_| "test-bucket".to_string()),
 
-            access_key: env::var("ACCESS_KEY").unwrap_or("123".to_string()),
-            secret_key: env::var("SECRET_KEY").unwrap_or("321".to_string()),
+            access_key: env::var("ACCESS_KEY").unwrap_or_else(|_| "123".to_string()),
+            secret_key: env::var("SECRET_KEY").unwrap_or_else(|_| "321".to_string()),
 
-            token_key: env::var("TOKEN_KEY").unwrap_or("123456789".to_string()),
+            token_key: env::var("TOKEN_KEY").unwrap_or_else(|_| "123456789".to_string()),
 
-            pool_size:  usize::from_str(&env::var("POOL_SIZE").unwrap_or("50".to_string())).unwrap()
+            pool_size:  usize::from_str(&env::var("POOL_SIZE").unwrap_or_else(|_| "50".to_string())).unwrap()
         }
     }
 }
