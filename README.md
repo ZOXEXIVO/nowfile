@@ -10,7 +10,6 @@ export ENDPOINT = {AWS S3 endpoint} (default - http://localhost:4572 (localstack
 export ACCESS_KEY = {AWS S3 ACCESS_KEY} (default - 123)
 export SECRET_KEY = {AWS S3 SECRET_KEY} (default - 321)
 export BUCKET_NAME = {default bucket name for upload | download files} (default - test-bucket)
-export TOKEN_KEY = {Key to sign you file token} (default - 123456789)
 export POOL_SIZE = {Size for intenal s3 client pool} (default - 50)
 
  ./nowfile 

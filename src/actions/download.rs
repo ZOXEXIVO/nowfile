@@ -19,7 +19,7 @@ pub async fn download_action(request: HttpRequest, route_params: web::Path<Downl
     let connection_info = request.connection_info();
     let remote_addr = connection_info.remote().unwrap_or("-");
     
-    match FileMetadata::from_id(&route_params.file_id, &state.options.token_key) {
+    match FileMetadata::from_id(&route_params.file_id) {
         Ok(metadata) => {
             let client = state.storage_client_pool.pull();
 

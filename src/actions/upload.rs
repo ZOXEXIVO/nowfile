@@ -40,7 +40,7 @@ pub async fn upload_action(
    
     match upload_result {
         Ok(_) => {
-            let file_id = file_metadata.into_id(&state.options.token_key);
+            let file_id = file_metadata.into_id();
 
             info!(state.logger, "Upload success {0}", remote_addr);
             

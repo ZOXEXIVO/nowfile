@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
-use crate::digest::HmacUtils;
+use crate::digest::HashUtils;
 use std::fmt::Write;
+use crate::utils::Base64Utils;
 
 #[derive(Serialize, Deserialize)]
 pub struct FileMetadata {
@@ -19,8 +20,17 @@ impl FileMetadata {
     }
     
     // {data}.{signature}
-    pub fn from_id(file_id: &str, token_secret: &str) -> Result<FileMetadata, String> {
-        let data_with_signature: Vec<&str> = file_id.split('.').collect();
+    pub fn from_id(file_id: &str) -> Result<FileMetadata, String> {
+        let decoding_result;
+        
+        match base64::decode(Base64Utils::decode_for_web(file_id)) {
+            Ok(res) => decoding_result = res,
+            Err(_) => return Err(String::from("format error"))
+        }
+        
+        let decoded = String::from_utf8(decoding_result).unwrap();
+        
+        let data_with_signature: Vec<&str> = decoded.split('.').collect();
         
         if data_with_signature.len() != 2 {
             return Err(String::from("format error"))
@@ -29,7 +39,7 @@ impl FileMetadata {
         let data = data_with_signature[0];
         let signature = data_with_signature[1];
 
-        let computed_signature = HmacUtils::compute(&data, token_secret);
+        let computed_signature = HashUtils::compute(&data);
         
         if signature != computed_signature {
             return Err(String::from("invalid signature"))
@@ -43,12 +53,12 @@ impl FileMetadata {
         }
     }
     
-    pub fn into_id(self, token_secret: &str) -> String {
+    pub fn into_id(self) -> String {
         let json_data = serde_json::to_string(&self).expect("cannot serialize metadata");
  
         let base64_json_data = base64::encode(json_data);
 
-        let signature = HmacUtils::compute(&base64_json_data, token_secret);
+        let signature = HashUtils::compute(&base64_json_data);
 
         let mut result_string = String::with_capacity(base64_json_data.len() + 1 + signature.len());
 
@@ -56,7 +66,7 @@ impl FileMetadata {
         result_string.write_char('.').unwrap();
         result_string.write_str(&signature).unwrap();
 
-        result_string
+        Base64Utils::encode_for_web(&base64::encode(result_string))      
     }
 }
 
@@ -66,13 +76,11 @@ mod tests {
 
     #[test]
     fn into_hash_from_hash_is_correct() {
-        let token_key = "some_key";
-        
         let metadata = FileMetadata::new(
             "image/jpg".to_string(), 
             "/path".to_string());
         
-        let decoded_metadata= FileMetadata::from_id(&metadata.into_id(&token_key), &token_key).unwrap();
+        let decoded_metadata= FileMetadata::from_id(&metadata.into_id()).unwrap();
         
         assert_eq!(decoded_metadata.content_type, "image/jpg".to_string());
         assert_eq!(decoded_metadata.path, "/path".to_string());

@@ -8,8 +8,6 @@ use std::str::FromStr;
 use crate::models::{ApplicationState};
 use crate::logging::Logger;
 
-use slog::*;
-
 mod models;
 mod digest;
 mod actions;
@@ -33,8 +31,6 @@ async fn main() -> std::io::Result<()> {
 }
 
 fn create_app_state<'s>(options: RunOptions, logger: slog::Logger) -> ApplicationState<'s> {
-    info!(logger, "nowfile started {0}, {1}", &options.endpoint, &options.bucket_name);
-    
     ApplicationState {
         storage_client_pool: Pool::new(options.pool_size, || {
             S3Client::new(&options.endpoint,
@@ -52,7 +48,6 @@ pub struct RunOptions {
     pub bucket_name: String,
     pub access_key: String,
     pub secret_key: String,
-    pub token_key: String,
     pub pool_size: usize
 }
 
@@ -65,8 +60,6 @@ impl RunOptions {
 
             access_key: env::var("ACCESS_KEY").unwrap_or_else(|_| "123".to_string()),
             secret_key: env::var("SECRET_KEY").unwrap_or_else(|_| "321".to_string()),
-
-            token_key: env::var("TOKEN_KEY").unwrap_or_else(|_| "123456789".to_string()),
 
             pool_size:  usize::from_str(&env::var("POOL_SIZE").unwrap_or_else(|_| "50".to_string())).unwrap()
         }

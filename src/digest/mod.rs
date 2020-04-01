@@ -1,3 +1,3 @@
-mod hmac;
+mod hash;
 
-pub use self::hmac::*;
+pub use self::hash::*;
