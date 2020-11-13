@@ -1,17 +1,17 @@
-use crate::utils::{PathUtils};
+use crate::utils::PathUtils;
 use actix_multipart::Multipart;
 use actix_web::web::Data;
-use actix_web::{Error, HttpResponse, Result, HttpRequest};
+use actix_web::{Error, HttpRequest, HttpResponse, Result};
 
+use crate::models::{ApplicationState, FileMetadata};
 use futures::{StreamExt, TryStreamExt};
 use std::io::Write;
-use crate::models::{ApplicationState, FileMetadata};
 
 use slog::*;
 
 pub async fn upload_action(
     request: HttpRequest,
-    state: Data<ApplicationState<'_>>,
+    state: Data<ApplicationState>,
     mut payload: Multipart,
 ) -> Result<HttpResponse, Error> {
     let mut payload_data = payload.try_next().await.unwrap().unwrap();
@@ -22,33 +22,32 @@ pub async fn upload_action(
         result_file_content.write_all(&chunk.unwrap()).unwrap();
     }
 
-    let file_metadata = FileMetadata::new(
-        String::from(""),
-        PathUtils::get_unique_file_path()
-    );
+    let file_metadata = FileMetadata::new(String::from(""), PathUtils::get_unique_file_path());
 
     let connection_info = request.connection_info();
-    let remote_addr = connection_info.remote().unwrap_or("-");
+    let remote_addr = connection_info.remote_addr().unwrap_or("-");
 
-    let client = state.storage_client_pool.pull();
+    let client = state.storage_client_pool.pull(|| state.create_client());
 
-    let upload_result = client.upload(
-        &file_metadata.path,
-        &file_metadata.content_type,
-        result_file_content,
-    ).await;
-   
+    let upload_result = client
+        .upload(
+            &file_metadata.path,
+            &file_metadata.content_type,
+            result_file_content,
+        )
+        .await;
+
     match upload_result {
         Ok(_) => {
             let file_id = file_metadata.into_id();
 
             info!(state.logger, "Upload success {0}", remote_addr);
-            
+
             Ok(HttpResponse::Ok().body(file_id))
-        },
+        }
         Err(err) => {
             error!(state.logger, "Upload error {0}, {1}", err, remote_addr);
-            
+
             Ok(HttpResponse::BadRequest().finish())
         }
     }
