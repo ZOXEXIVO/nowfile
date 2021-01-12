@@ -23,9 +23,9 @@ impl S3Client {
 
     pub async fn download(&self, path: &str) -> Result<Vec<u8>, String> {
         match self.bucket.get_object(path).await {
-            Ok(data) => match data.1 {
-                200 => Ok(data.0),
-                _ => Err(format!("StatusCode: {0}", data.1)),
+            Ok((data, status_code)) => match status_code {
+                200 => Ok(data),
+                _ => Err(format!("StatusCode: {0}", status_code)),
             },
             Err(err) => Err(err.description.unwrap()),
         }
@@ -42,9 +42,9 @@ impl S3Client {
             .put_object_with_content_type(&path, &file_content, &content_type)
             .await
         {
-            Ok(data) => match data.1 {
+            Ok((_, status_code)) => match status_code {
                 200 => Ok(()),
-                _ => Err(format!("StatusCode: {0}", data.1)),
+                _ => Err(format!("StatusCode: {0}", status_code)),
             },
             Err(err) => Err(String::from(err.description.unwrap())),
         }

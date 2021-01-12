@@ -1,5 +1,5 @@
-use std::hash::{Hash, Hasher};
 use fnv::FnvHasher;
+use std::hash::{Hash, Hasher};
 
 pub struct HashUtils;
 
@@ -20,7 +20,6 @@ impl HashUtils {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::FileMetadata;
 
     #[test]
     fn compute_is_correct() {
@@ -32,7 +31,6 @@ mod tests {
 
         let data2_signature = HashUtils::compute(&data2);
 
-        
         assert_eq!(data1_signature, String::from("10429865961791751215"));
         assert_eq!(data2_signature, String::from("10429867061303379426"));
 

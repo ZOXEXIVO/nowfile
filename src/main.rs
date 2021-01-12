@@ -3,23 +3,23 @@ use crate::storage::S3Client;
 use actix_web::{web, App, HttpResponse, HttpServer};
 use object_pool::Pool;
 
-use crate::logging::Logger;
 use crate::models::ApplicationState;
+use env_logger::Env;
 use std::env;
 use std::str::FromStr;
 
 mod actions;
 mod digest;
-mod logging;
 mod models;
 mod storage;
 mod utils;
 
 #[actix_rt::main]
 async fn main() -> std::io::Result<()> {
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+
     HttpServer::new(move || {
-        let logger = Logger::init("nowfile");
-        let application_state = create_app_state(RunOptions::from_env(), logger);
+        let application_state = create_app_state(RunOptions::from_env());
 
         App::new()
             .data(application_state)
@@ -34,7 +34,7 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 
-fn create_app_state<'s>(options: RunOptions, logger: slog::Logger) -> ApplicationState {
+fn create_app_state<'s>(options: RunOptions) -> ApplicationState {
     ApplicationState {
         storage_client_pool: Pool::new(options.pool_size, || {
             S3Client::new(
@@ -44,7 +44,6 @@ fn create_app_state<'s>(options: RunOptions, logger: slog::Logger) -> Applicatio
                 &options.secret_key,
             )
         }),
-        logger,
         options,
     }
 }

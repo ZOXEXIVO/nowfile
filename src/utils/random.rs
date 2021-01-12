@@ -1,14 +1,16 @@
-use rand::Rng;
 use rand::distributions::Alphanumeric;
+use rand::Rng;
 
 pub struct Random;
 
 impl Random {
     pub fn generate_random(characters_count: usize) -> String {
-        rand::thread_rng()
+        let bytes_data: Vec<u8> = rand::thread_rng()
             .sample_iter(&Alphanumeric)
             .take(characters_count)
-            .collect::<String>()
+            .collect();
+        
+        String::from_utf8(bytes_data).unwrap()
     }
 }
 
@@ -21,7 +23,7 @@ mod tests {
         let value1 = Random::generate_random(30);
         let value2 = Random::generate_random(30);
         let value3 = Random::generate_random(30);
-        
+
         assert_ne!(value1, value2);
         assert_ne!(value1, value3);
         assert_ne!(value2, value3);

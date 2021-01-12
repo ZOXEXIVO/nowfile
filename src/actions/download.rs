@@ -2,7 +2,7 @@ use actix_web::web::Data;
 use actix_web::{web, HttpRequest, HttpResponse, Result};
 use serde::Deserialize;
 
-use slog::*;
+use log::{info, error};
 
 use crate::models::{ApplicationState, FileMetadata};
 
@@ -27,30 +27,21 @@ pub async fn download_action(
 
             match file_content_result {
                 Ok(file_content) => {
-                    info!(
-                        state.logger,
-                        "download success, {0} {1}", metadata.path, remote_addr
-                    );
+                    info!("download success, {0} {1}", metadata.path, remote_addr);
 
                     Ok(HttpResponse::Ok()
                         .content_type(&metadata.content_type)
                         .body(file_content))
                 }
                 Err(err) => {
-                    error!(
-                        state.logger,
-                        "download failed, {0}, {1}", &route_params.file_id, err
-                    );
+                    error!("download failed, {0}, {1}", &route_params.file_id, err);
 
                     Ok(HttpResponse::InternalServerError().finish())
                 }
             }
         }
         Err(err) => {
-            error!(
-                state.logger,
-                "download failed, {0}, {1}", &route_params.file_id, err
-            );
+            error!("download failed, {0}, {1}", &route_params.file_id, err);
 
             Ok(HttpResponse::NotFound().finish())
         }

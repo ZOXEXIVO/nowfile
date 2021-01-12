@@ -1,16 +1,16 @@
-use chrono::{DateTime, Datelike, Utc};
 use crate::utils::Random;
+use chrono::{DateTime, Datelike, Utc};
 
 pub struct PathUtils;
 
-impl PathUtils{
+impl PathUtils {
     pub fn get_unique_file_path() -> String {
         let folder = Self::get_current_date_folder();
         let filename = Random::generate_random(20);
-        
+
         format!("{0}/{1}", folder, filename)
-    } 
-    
+    }
+
     fn get_current_date_folder() -> String {
         let utc: DateTime<Utc> = Utc::now();
 

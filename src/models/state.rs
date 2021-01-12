@@ -4,8 +4,7 @@ use crate::RunOptions;
 
 pub struct ApplicationState {
     pub storage_client_pool: Pool<S3Client>,
-    pub options: RunOptions,
-    pub logger: slog::Logger
+    pub options: RunOptions
 }
 
 impl ApplicationState{

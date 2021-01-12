@@ -7,7 +7,7 @@ use crate::models::{ApplicationState, FileMetadata};
 use futures::{StreamExt, TryStreamExt};
 use std::io::Write;
 
-use slog::*;
+use log::{info, error};
 
 pub async fn upload_action(
     request: HttpRequest,
@@ -41,12 +41,12 @@ pub async fn upload_action(
         Ok(_) => {
             let file_id = file_metadata.into_id();
 
-            info!(state.logger, "Upload success {0}", remote_addr);
+            info!("Upload success {0}", remote_addr);
 
             Ok(HttpResponse::Ok().body(file_id))
         }
         Err(err) => {
-            error!(state.logger, "Upload error {0}, {1}", err, remote_addr);
+            error!("Upload error {0}, {1}", err, remote_addr);
 
             Ok(HttpResponse::BadRequest().finish())
         }
