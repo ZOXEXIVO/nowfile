@@ -25,7 +25,7 @@ pub async fn upload_action(
     let file_metadata = FileMetadata::new(String::from(""), PathUtils::get_unique_file_path());
 
     let connection_info = request.connection_info();
-    let remote_addr = connection_info.remote_addr().unwrap_or("-");
+    let remote_addr = connection_info.peer_addr().unwrap_or("-");
 
     let client = state.storage_client_pool.pull(|| state.create_client());
 

@@ -5,17 +5,17 @@ authors = ["Artemov Ivan (ZOXEXIVO) <zoxexivo@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-actix-web = "3.3.2"
-actix-rt = "1.1.1"
-rust-s3 = { version = "0.26.4", features = ["no-verify-ssl"] }
-object-pool = "0.5.3"
-rand = "0.8.1"
+actix-web = "4.0.1"
+actix-rt = "2.7.0"
+rust-s3 = { version = "0.30.0", features = ["no-verify-ssl"] }
+object-pool = "0.5.4"
+rand = "0.8.5"
 chrono = "0.4.19"
-actix-multipart = "0.3.0"
-futures = "0.3.9"
-serde = "1.0.119"
-serde_json = "1.0.61"
+actix-multipart = "0.4.0"
+futures = "0.3.21"
+serde = { version = "1.0.136", features = ["derive"] } 
+serde_json = "1.0.79"
 base64 = "0.13.0"
-log = { version = "0.4.13", features = ["release_max_level_info"] }
-env_logger = "0.8.2"
+log = { version = "0.4.16", features = ["release_max_level_info"] }
+env_logger = "0.9.0"
 fnv = "1.0.7"

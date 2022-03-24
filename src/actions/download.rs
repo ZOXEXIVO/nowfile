@@ -17,7 +17,7 @@ pub async fn download_action(
     state: Data<ApplicationState>,
 ) -> Result<HttpResponse> {
     let connection_info = request.connection_info();
-    let remote_addr = connection_info.remote_addr().unwrap_or("-");
+    let remote_addr = connection_info.peer_addr().unwrap_or("-");
 
     match FileMetadata::from_id(&route_params.file_id) {
         Ok(metadata) => {
@@ -30,7 +30,7 @@ pub async fn download_action(
                     info!("download success, {0} {1}", metadata.path, remote_addr);
 
                     Ok(HttpResponse::Ok()
-                        .content_type(&metadata.content_type)
+                        .content_type(metadata.content_type)
                         .body(file_content))
                 }
                 Err(err) => {

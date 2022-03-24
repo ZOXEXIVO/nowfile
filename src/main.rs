@@ -7,6 +7,7 @@ use crate::models::ApplicationState;
 use env_logger::Env;
 use std::env;
 use std::str::FromStr;
+use actix_web::web::Data;
 
 mod actions;
 mod digest;
@@ -22,7 +23,7 @@ async fn main() -> std::io::Result<()> {
         let application_state = create_app_state(RunOptions::from_env());
 
         App::new()
-            .data(application_state)
+            .app_data(Data::new(application_state))
             .service(
                 web::resource("/favicon.ico").route(web::get().to(|| HttpResponse::NotFound())),
             )

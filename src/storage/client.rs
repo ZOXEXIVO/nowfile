@@ -27,7 +27,7 @@ impl S3Client {
                 200 => Ok(data),
                 _ => Err(format!("StatusCode: {0}", status_code)),
             },
-            Err(err) => Err(err.description.unwrap()),
+            Err(err) => Err(err.to_string()),
         }
     }
 
@@ -46,7 +46,7 @@ impl S3Client {
                 200 => Ok(()),
                 _ => Err(format!("StatusCode: {0}", status_code)),
             },
-            Err(err) => Err(String::from(err.description.unwrap())),
+            Err(err) => Err(String::from(err.to_string())),
         }
     }
 }
