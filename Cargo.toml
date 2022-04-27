@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 actix-web = "4.0.1"
 actix-rt = "2.7.0"
-rust-s3 = { version = "0.30.0", features = ["no-verify-ssl"] }
+rust-s3 = { version = "0.31.0", features = ["no-verify-ssl"] }
 object-pool = "0.5.4"
 rand = "0.8.5"
 chrono = "0.4.19"

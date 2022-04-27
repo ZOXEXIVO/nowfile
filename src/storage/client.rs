@@ -17,7 +17,7 @@ impl S3Client {
         };
 
         S3Client {
-            bucket: Bucket::new_with_path_style(&bucket_name, region, credentials).unwrap(),
+            bucket: Bucket::new(&bucket_name, region, credentials).unwrap(),
         }
     }
 
